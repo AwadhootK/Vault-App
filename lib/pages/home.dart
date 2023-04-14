@@ -27,9 +27,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     int folder_index = ModalRoute.of(context)!.settings.arguments as int;
-    List<String> l =
-        Provider.of<LinkList>(context).links[folder_index].folder_links;
+    print('Folder Index: $folder_index');
+    List<String> l = Provider.of<LinkList>(context, listen: false)
+        .links[folder_index]
+        .folder_links;
     return Scaffold(
+      backgroundColor: Colors.blue[900],
       appBar: AppBar(
         title: const Text('Your Links'),
       ),
@@ -37,38 +40,42 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(8.0),
         child: Consumer<LinkList>(
           builder: (context, linkList, child) {
-            return l.isEmpty
+            return (l.isEmpty || l == [] || l[0] == '')
                 ? const Center(
                     child: Text('NO LINKS!'),
                   )
                 : ListView.builder(
                     itemCount: l.length,
                     itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: () {
-                          try {
-                            _launchURL(l[index]);
-                          } catch (error) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(error.toString()),
+                      if (l[index] != '') {
+                        return InkWell(
+                          onTap: () {
+                            try {
+                              _launchURL(l[index]);
+                            } catch (error) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(error.toString()),
+                                ),
+                              );
+                            }
+                          },
+                          child: Card(
+                            elevation: 10,
+                            child: ListTile(
+                              title: Text(l[index]),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  Provider.of<LinkList>(context, listen: false)
+                                      .removelink(folder_index, index)
+                                      .then((value) => setState(() {}));
+                                },
                               ),
-                            );
-                          }
-                        },
-                        child: Card(
-                          elevation: 10,
-                          child: ListTile(
-                            title: Text(l[index]),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                linkList.removelink(folder_index, index);
-                              },
                             ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                   );
           },

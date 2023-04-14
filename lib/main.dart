@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lock_app/pages/auth.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:provider/provider.dart';
@@ -33,10 +34,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => LinkList(db)),
       ],
       child: MaterialApp(
-        home: Lock(),
+        debugShowCheckedModeBanner: false,
+        home: FingerPrintAuth(),
         routes: {
-          HomePage.routeName: (context) => const HomePage(),
-          FolderScreen.routeName: (context) => const FolderScreen(),
+          HomePage.routeName: (context) => HomePage(),
+          FolderScreen.routeName: (context) => FolderScreen(),
         },
       ),
     );

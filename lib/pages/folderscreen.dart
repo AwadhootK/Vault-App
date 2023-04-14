@@ -15,18 +15,38 @@ class FolderScreen extends StatefulWidget {
 class _FolderScreenState extends State<FolderScreen> {
   bool _isloading = false;
   List<Folder> l = [];
+  late final provider;
 
   @override
   void initState() {
     super.initState();
-    l = Provider.of<LinkList>(context, listen: false).links;
+    provider = Provider.of<LinkList>(context, listen: false);
+    _loadData();
+  }
+
+  void _loadData() async {
+    await provider.getFolders();
+    l = provider.links;
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue[900],
       appBar: AppBar(
         title: const Text('Your Folders'),
+        actions: [
+          IconButton(
+            onPressed: () async =>
+                await Provider.of<LinkList>(context, listen: false)
+                    .clear()
+                    .then((value) => setState(() {
+                          _loadData();
+                        })),
+            icon: const Icon(Icons.delete),
+          )
+        ],
       ),
       body: _isloading
           ? const Center(
@@ -59,9 +79,13 @@ class _FolderScreenState extends State<FolderScreen> {
                               actions: [
                                 TextButton(
                                   onPressed: () {
-                                    Provider.of<LinkList>(context)
-                                        .removeFolder(index);
-                                    Navigator.of(context).pop();
+                                    Provider.of<LinkList>(context,
+                                            listen: false)
+                                        .removeFolder(index)
+                                        .then((value) {
+                                      Navigator.of(context).pop();
+                                      setState(() {});
+                                    });
                                   },
                                   child: const Text('Yes'),
                                 ),
@@ -133,7 +157,9 @@ class _FolderScreenState extends State<FolderScreen> {
                                   .addFolder(name, c)
                                   .then((value) {
                                 Navigator.of(context).pop();
-                                setState(() {});
+                                setState(() {
+                                  _loadData();
+                                });
                               });
                             } else {
                               showDialog(
